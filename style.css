@@ -1,0 +1,9 @@
+div {
+    display: flex;
+}
+
+textarea {
+    resize: none;
+    width: 49vw;
+    height: 49vh;
+}
