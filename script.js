@@ -1,27 +1,68 @@
+initializationComponent();
 
-var container = document.createElement("div");
-document.body.appendChild(container);
+function initializationComponent() {
+    var container = document.createElement("div");
+    document.body.appendChild(container);
 
-var input = document.createElement("textarea");
-var output = document.createElement("textarea");
-output.setAttribute("readonly", "");
+    var inputArea = document.createElement("textarea");
+    inputArea.setAttribute("id", "inputArea");
+    container.appendChild(inputArea);
 
-container.appendChild(input);
-container.appendChild(output);
+    var outputArea = document.createElement("textarea");
+    outputArea.setAttribute("id", "outputArea");
+    outputArea.setAttribute("readonly", "");
+    container.appendChild(outputArea);
 
-var button = document.createElement("button");
-button.textContent = "Interpret";
-button.onclick = test;
-document.body.appendChild(button);
+    var machineTable = document.createElement("table");
+    machineTable.setAttribute("id", "machineTable");
+    for (var i = 0; i < 10; i++) {
+        var row = machineTable.insertRow();
+        for (var j = 0; j < 10; j++) {
+            var cell = row.insertCell();
+            cell.innerHTML = "000";
+        }
+    }
+    container.appendChild(machineTable);
 
-function test() {
-    var lines = input.value.split("\n").filter(Boolean);
+    var loadInput = document.createElement("input");
+    loadInput.setAttribute("type", "file");
+    loadInput.setAttribute("id", "loadInput");
+    loadInput.setAttribute("hidden", "");
+    loadInput.setAttribute("onchange", "load(this)");
+    document.body.appendChild(loadInput);
 
+    var loadButton = document.createElement("label");
+    loadButton.setAttribute("for", "loadInput");
+    loadButton.setAttribute("class", "btn");
+    loadButton.innerHTML = "Load";
+    document.body.appendChild(loadButton);
+
+    var compileButton = document.createElement("label");
+    compileButton.setAttribute("class", "btn");
+    compileButton.setAttribute("onclick", "compile()");
+    compileButton.innerHTML = "Compile";
+    document.body.appendChild(compileButton);
+}
+
+function load(input) {
+    var file = input.files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+
+    reader.onload = function () {
+        var inputArea = document.getElementById("inputArea");
+        inputArea.value = reader.result;
+    }
+}
+
+function compile() {
+    var inputArea = document.getElementById("inputArea");
+    var outputArea = document.getElementById("outputArea");
+    var machineTable = document.getElementById("machineTable");
+
+    var lines = inputArea.value.split("\n").filter(Boolean);
     // Очистка комментариев
     deletingComments(lines);
-
-    // Проверка на синтаксические ошибки
-    
 
     // Первый проход, получаем адреса меток 
     var labels = getLabelsAddress(lines);
@@ -29,14 +70,21 @@ function test() {
     // Второй проход, построение промежуточного кода
     var intermediateCode = getIntermediateCode(lines, labels);
 
-    // Третий проход, построение машинного кода
-    var machineCode = getMachineCode(intermediateCode);
+    // Проверка на синтаксические ошибки
+    if (dataValidity(intermediateCode, outputArea)) {
 
-    output.value = intermediateCode + "\n";
-    for (var i = 0; i < machineCode.length; i++) {
-        output.value += machineCode[i] + ' ';
-        if (i % 10 == 9)
-            output.value += "\n";
+        // Третий проход, построение машинного кода
+        var machineCode = getMachineCode(intermediateCode);
+
+        outputArea.value = intermediateCode;
+
+        var trs = (machineTable.children)[0].children;
+        for (var i = 0; i < trs.length; i++) {
+            var tds = trs[i].children;
+            for (var j = 0; j < tds.length; j++) {
+                tds[j].innerHTML = machineCode[i * trs.length + j];
+            }
+        }
     }
 }
 
@@ -49,6 +97,30 @@ function deletingComments(lines) {
                 lines[i] = lines[i].slice(0, lines[i].indexOf("//"));
         }
     }
+}
+
+function dataValidity(intermediateCode, outputArea) {
+    var lines = intermediateCode.split("\n").filter(Boolean);
+    for (var i = 0; i < lines.length; i++) {
+        var items = lines[i].split(" ").filter(Boolean);
+        if (isCommand(items[1]) != "LABEL") {
+            if (items[1] != "INP" && items[1] != "OUT" && items[1] != "HLT") {
+                if (Number.isNaN(Number(items[2]))) {
+                    outputArea.value = "String: " + (i + 1).toString() + "\tItem: 3";
+                    return false;
+                }
+            }
+            else if (items.length > 2) {
+                outputArea.value = "String: " + (i + 1).toString() + "\tItem: 3";
+                return false;
+            }
+        }
+        else {
+            outputArea.value = "String: " + (i + 1).toString() + "\tItem: 2";
+            return false;
+        }
+    }
+    return true;
 }
 
 function getLabelsAddress(lines) {
