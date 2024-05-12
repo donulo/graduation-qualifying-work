@@ -13,6 +13,50 @@ function initializationComponent() {
     outputArea.setAttribute("readonly", "");
     container.appendChild(outputArea);
 
+    var controller = document.createElement("div");
+    controller.setAttribute("id", "controller");
+    container.appendChild(controller);
+
+
+    var inputFieldLabel = document.createElement("label");
+    inputFieldLabel.innerHTML = "Input: ";
+    controller.appendChild(inputFieldLabel);
+
+    var inputField = document.createElement("textarea");
+    inputField.setAttribute("id", "inputField");
+    inputField.setAttribute("class", "field");
+    controller.appendChild(inputField);
+
+    var outputFieldLabel = document.createElement("label");
+    outputFieldLabel.innerHTML = "Output: ";
+    controller.appendChild(outputFieldLabel);
+
+    var outputField = document.createElement("textarea");
+    outputField.setAttribute("id", "outputField");
+    outputField.setAttribute("class", "field");
+    outputField.setAttribute("readonly", "");
+    controller.appendChild(outputField);
+
+    var programCounterLabel = document.createElement("label");
+    programCounterLabel.innerHTML = "Program Counter: ";
+    controller.appendChild(programCounterLabel);
+
+    var programCounter = document.createElement("textarea");
+    programCounter.setAttribute("id", "programCounter");
+    programCounter.setAttribute("class", "field");
+    programCounter.setAttribute("readonly", "");
+    controller.appendChild(programCounter);
+
+    var accumulatorLabel = document.createElement("label");
+    accumulatorLabel.innerHTML = "Accumulator: ";
+    controller.appendChild(accumulatorLabel);
+
+    var accumulator = document.createElement("textarea");
+    accumulator.setAttribute("id", "accumulator");
+    accumulator.setAttribute("class", "field");
+    accumulator.setAttribute("readonly", "");
+    controller.appendChild(accumulator);
+
     var machineTable = document.createElement("table");
     machineTable.setAttribute("id", "machineTable");
     for (var i = 0; i < 10; i++) {
@@ -42,6 +86,12 @@ function initializationComponent() {
     compileButton.setAttribute("onclick", "compile()");
     compileButton.innerHTML = "Compile";
     document.body.appendChild(compileButton);
+
+    var runButton = document.createElement("label");
+    runButton.setAttribute("class", "btn");
+    runButton.setAttribute("onclick", "run()");
+    runButton.innerHTML = "Run";
+    document.body.appendChild(runButton);
 }
 
 function load(input) {
@@ -59,6 +109,10 @@ function compile() {
     var inputArea = document.getElementById("inputArea");
     var outputArea = document.getElementById("outputArea");
     var machineTable = document.getElementById("machineTable");
+    document.getElementById("inputField").value = "";
+    document.getElementById("outputField").value = "";
+    document.getElementById("programCounter").value = "";
+    document.getElementById("accumulator").value = "";
 
     var lines = inputArea.value.split("\n").filter(Boolean);
     // Очистка комментариев
@@ -198,8 +252,65 @@ function isCommand(command) {
         case "HLT":
             return "000";
         case "DAT":
-            return ""
+            return "";
         default:
-            return "LABEL"
+            return "LABEL";
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function run() {
+    //#region Вынести переменные за пределы функции компиляции, чтобы не делать одно и тоже дважды
+    //        или забирать информацию с machineTable
+    var inputArea = document.getElementById("inputArea");
+    var lines = inputArea.value.split("\n").filter(Boolean);
+    deletingComments(lines);
+    var labels = getLabelsAddress(lines);
+    var machineCode = getMachineCode(getIntermediateCode(lines, labels));
+    //#endregion
+
+    var programCounter = document.getElementById("programCounter");
+    for (var i = 0; i < machineCode.length; i++) {
+        if (machineCode[i] == "000")
+            break;
+        programCounter.value = i.toString().padStart(2, "0");
+        command(machineCode[i]);
+        await sleep(2000);
+    }
+}
+
+function command(input) {
+    var accumulator = document.getElementById("accumulator");
+    var machineTable = document.getElementById("machineTable");
+    var instruction = parseInt(input[0]);
+    var register = parseInt(input.substring(1));
+
+    switch (instruction) {
+        case 0:
+            return "EXIT";
+        case 9:
+            if (register == 1)
+                return "INPUT";
+            if (register == 2)
+                return "OUPUT";
+        case 1:
+            return "ADD";
+        case 2:
+            return "SUB";
+        case 3:
+            machineTable.rows[Math.floor(register / 10)].cells[register % 10].innerHTML = accumulator.value;
+            return "STORE";
+        case 5:
+            accumulator.value = machineTable.rows[Math.floor(register / 10)].cells[register % 10].innerHTML;
+            return "LOAD";
+        case 6:
+            return "BRA";
+        case 7:
+            return "BRZ";
+        case 8:
+            return "BRP";
     }
 }
