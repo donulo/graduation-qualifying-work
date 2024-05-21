@@ -2,10 +2,6 @@ body {
     font-family: Consolas, monospace;
 }
 
-div {
-    display: flex;
-}
-
 textarea {
     resize: none;
     width: 20vw;
@@ -22,7 +18,7 @@ td {
     text-align: center;
 }
 
-.btn {
+.button {
     border: 1px solid #ccc;
     display: inline-block;
     padding: 6px 12px;
@@ -34,9 +30,27 @@ td {
     height: 16px;
 }
 
-#controller {
-    align-items: center;
-    width: 20vw;
+.flex {
     display: flex;
+}
+
+.column {
     flex-direction: column;
+}
+
+.center {
+    align-items: center;
+}
+
+#controller-container {
+    width: 20vw;
+}
+
+#inputdiv {
+    width: calc(80% + 5px);
+}
+
+#inputdiv>.button {
+    padding: 0px 8px;
+    height: 20px;
 }

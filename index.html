@@ -8,7 +8,57 @@
 </head>
 
 <body>
-    <script src="script.js"></script>
+    <script src="file.js"></script>
+
+    <div class="flex">
+        <div class="flex">
+            <textarea id="inputArea"></textarea>
+            <textarea id="outputArea" readonly></textarea>
+        </div>
+
+        <div id="controller-container" class="flex column">
+            <div class="flex column center">
+                <label>Input</label>
+                <div id="inputdiv" class="flex">
+                    <textarea id="input" class="field"></textarea>
+                    <label id="sumbit" class="button">&gt;&gt;</label>
+                </div>
+            </div>
+            <div class="flex column center">
+                <label>Output</label>
+                <textarea id="output" class="field" readonly></textarea>
+            </div>
+            <div class="flex column center">
+                <label>Program Counter</label>
+                <textarea id="program_counter" class="field" readonly></textarea>
+            </div>
+            <div class="flex column center">
+                <label>Accumulator</label>
+                <textarea id="accumulator" class="field" readonly></textarea>
+            </div>
+        </div>
+
+        <div id="memory-container">
+            <table id="memory"></table>
+        </div>
+    </div>
+    <div class="flex">
+        <div>
+            <input id="load" type="file" onchange="load(this)" hidden>
+            <label class="button" for="load">Load</label>
+        </div>
+        <div>
+            <label id="compile" class="button">Compile</label>
+        </div>
+        <div>
+            <label id="run" class="button">Run</label>
+        </div>
+        <div>
+            <label id="step" class="button">Step</label>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>
