@@ -14,8 +14,16 @@ table {
 }
 
 td {
+    padding: 0px calc((4vw - 31px) / 2);
+    margin: 0px 1px;
+    padding-bottom: calc((5vh - 27.391px) / 2);
+    display: inline-grid;
     border: 1px solid #ccc;
     text-align: center;
+}
+
+.labelCell {
+    font-size: 12px;
 }
 
 .button {
