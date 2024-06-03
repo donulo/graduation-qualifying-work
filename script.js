@@ -52,6 +52,8 @@ function sleep(ms) {
 
 async function run() {
   do {
+    highlightLine("inputArea", "highlightInputArea", lmc.controller.program_counter);
+    highlightLine("outputArea", "highlightOutputArea", lmc.controller.program_counter);
     clearBorder();
     currentBorder(lmc.controller.program_counter);
     drawing();
@@ -61,6 +63,8 @@ async function run() {
 document.querySelector('#run').addEventListener('click', run);
 
 async function step() {
+  highlightLine("inputArea", "highlightInputArea", lmc.controller.program_counter);
+  highlightLine("outputArea", "highlightOutputArea", lmc.controller.program_counter);
   clearBorder();
   currentBorder(lmc.controller.program_counter);
   await lmc.step();
@@ -81,5 +85,30 @@ function clearBorder() {
 function currentBorder(program_counter) {
   var trs = (memory.children)[0].children
   var tds = trs[parseInt(program_counter / 10)].children;
-  tds[program_counter % 10].style.border = '1px solid green';
+  tds[program_counter % 10].style.border = '1px solid rgba(0, 255, 0, 0.7)';
+}
+
+function highlightLine(textareaId, highlightId, lineNumber) {
+    const textarea = document.getElementById(textareaId);
+    const highlight = document.getElementById(highlightId);
+    const lines = textarea.value.split('\n');
+
+    if (lineNumber < 0 || lineNumber > lines.length) {
+        alert('Invalid line number');
+        return;
+    }
+
+    // Build highlighted conten
+    let highlightedContent = '';
+    lines.forEach((line, index) => {
+        if (index === lineNumber) {
+            highlightedContent += `<span class="highlight">${line || ' '}</span>\n`;
+        } else {
+            highlightedContent += `${line}\n`;
+        }
+    });
+    console.log(highlight);
+
+    // Update the highlight pre element
+    highlight.innerHTML = highlightedContent;
 }

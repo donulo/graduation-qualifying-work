@@ -12,8 +12,14 @@
 
     <div class="flex">
         <div class="flex">
-            <textarea id="inputArea"></textarea>
-            <textarea id="outputArea" readonly></textarea>
+            <div class="highlight-container">
+                <pre id="highlightInputArea" class="highlight-text"></pre>
+                <textarea id="inputArea"></textarea>
+            </div>
+            <div class="highlight-container">
+                <pre id="highlightOutputArea" class="highlight-text"></pre>
+                <textarea id="outputArea" readonly></textarea>
+            </div>
         </div>
 
         <div id="controller-container" class="flex column">

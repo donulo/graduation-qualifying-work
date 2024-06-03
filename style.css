@@ -16,7 +16,7 @@ table {
 td {
     padding: 0px calc((4vw - 31px) / 2);
     margin: 0px 1px;
-    padding-bottom: calc((5vh - 27.391px) / 2);
+    padding-bottom: calc((5vh - 34.5px) / 2);
     display: inline-grid;
     border: 1px solid #ccc;
     text-align: center;
@@ -62,3 +62,32 @@ td {
     padding: 0px 8px;
     height: 20px;
 }
+
+.highlight {
+            display: block;
+            width: 100%; /* Make the highlight 2px wider */
+            background-color: rgba(0, 255, 0, 0.7);
+            height: calc(1em + 5px); /* Make the highlight 2px taller */
+        }
+        .highlight-container {
+            position: relative;
+            width: fit-content;
+        }
+        .highlight-text {
+            position: absolute;
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            background: transparent;
+            pointer-events: none;
+            z-index: 1;
+            color: transparent;
+            margin: 1px 0;
+            padding: 0;
+            width: 100%;
+        }
+        textarea {
+            position: relative;
+            background: none;
+            z-index: 2;
+            color: black;
+        }
