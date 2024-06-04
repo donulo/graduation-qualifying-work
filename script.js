@@ -1,31 +1,31 @@
 import LMC from './libs/lmc-lib/LMC.js';
 
-var input = document.getElementById('input');
-var output = document.getElementById('output');
-var program_counter = document.getElementById('program_counter');
-var accumulator = document.getElementById('accumulator');
-var memory = document.getElementById('memory');
-var lmc = new LMC('');
+let input = document.getElementById('input');
+let output = document.getElementById('output');
+let program_counter = document.getElementById('program_counter');
+let accumulator = document.getElementById('accumulator');
+let memory = document.getElementById('memory');
+let lmc = new LMC('');
 
 initTable();
 drawing();
 
 function initTable() {
-  for (var i = 0; i < 10; i++) {
-    var row = memory.insertRow();
-    for (var j = 0; j < 10; j++) {
+  for (let i = 0; i < 10; i++) {
+    let row = memory.insertRow();
+    for (let j = 0; j < 10; j++) {
       row.insertCell();
     }
   }
 }
 
 function drawing() {
-  var trs = (memory.children)[0].children;
-  for (var i = 0; i < trs.length; i++) {
-    var tds = trs[i].children;
-    for (var j = 0; j < tds.length; j++) {
+  let trs = (memory.children)[0].children;
+  for (let i = 0; i < trs.length; i++) {
+    let tds = trs[i].children;
+    for (let j = 0; j < tds.length; j++) {
       tds[j].innerHTML = lmc.controller.memory[i * trs.length + j];
-      var label = document.createElement('label');
+      let label = document.createElement('label');
       label.setAttribute('class', 'labelCell');
       label.innerHTML = 10 * i + j;
       tds[j].prepend(label);
@@ -38,9 +38,19 @@ function drawing() {
 }
 
 function compile() {
-  var text = document.getElementById('inputArea').value;
+  let text = document.getElementById('inputArea').value;
   lmc = new LMC(text);
-  document.getElementById('outputArea').value = lmc.compiler.intermediate_code;
+  if (lmc.compiler.intermediate_code != undefined)
+    document.getElementById('outputArea').value =
+        lmc.compiler.intermediate_code;
+  else {
+    document.getElementById('outputArea').value =
+        'Error: ' + lmc.compiler.error.code;
+    document.getElementById('outputArea').value +=
+        '\nLine: ' + lmc.compiler.error.line;
+    highlightLine(
+        'inputArea', 'highlightInputArea', lmc.compiler.error.line, 'red');
+  }
   clearBorder();
   drawing();
 }
@@ -52,8 +62,12 @@ function sleep(ms) {
 
 async function run() {
   do {
-    highlightLine("inputArea", "highlightInputArea", lmc.controller.program_counter);
-    highlightLine("outputArea", "highlightOutputArea", lmc.controller.program_counter);
+    highlightLine(
+        'inputArea', 'highlightInputArea', lmc.controller.program_counter,
+        'green');
+    highlightLine(
+        'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
+        'green');
     clearBorder();
     currentBorder(lmc.controller.program_counter);
     drawing();
@@ -63,8 +77,12 @@ async function run() {
 document.querySelector('#run').addEventListener('click', run);
 
 async function step() {
-  highlightLine("inputArea", "highlightInputArea", lmc.controller.program_counter);
-  highlightLine("outputArea", "highlightOutputArea", lmc.controller.program_counter);
+  highlightLine(
+      'inputArea', 'highlightInputArea', lmc.controller.program_counter,
+      'green');
+  highlightLine(
+      'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
+      'green');
   clearBorder();
   currentBorder(lmc.controller.program_counter);
   await lmc.step();
@@ -72,43 +90,55 @@ async function step() {
 }
 document.querySelector('#step').addEventListener('click', step);
 
+function reset() {
+  lmc = new LMC('');
+  document.getElementById('outputArea').value = '';
+  resetHighlight('highlightInputArea');
+  resetHighlight('highlightOutputArea');
+  clearBorder();
+  drawing();
+}
+document.querySelector('#reset').addEventListener('click', reset);
+
 function clearBorder() {
-  var border = '1px solid #ccc';
-  var trs = (memory.children)[0].children;
-  for (var i = 0; i < trs.length; i++) {
-    var tds = trs[i].children;
-    for (var j = 0; j < tds.length; j++) {
+  let border = '1px solid #ccc';
+  let trs = (memory.children)[0].children;
+  for (let i = 0; i < trs.length; i++) {
+    let tds = trs[i].children;
+    for (let j = 0; j < tds.length; j++) {
       tds[j].style.border = border;
     }
   }
 }
+
 function currentBorder(program_counter) {
-  var trs = (memory.children)[0].children
-  var tds = trs[parseInt(program_counter / 10)].children;
+  let trs = (memory.children)[0].children
+  let tds = trs[parseInt(program_counter / 10)].children;
   tds[program_counter % 10].style.border = '1px solid rgba(0, 255, 0, 0.7)';
 }
 
-function highlightLine(textareaId, highlightId, lineNumber) {
-    const textarea = document.getElementById(textareaId);
-    const highlight = document.getElementById(highlightId);
-    const lines = textarea.value.split('\n');
+function highlightLine(textareaId, highlightId, lineNumber, color) {
+  const textarea = document.getElementById(textareaId);
+  const highlight = document.getElementById(highlightId);
+  const lines = textarea.value.split('\n');
 
-    if (lineNumber < 0 || lineNumber > lines.length) {
-        alert('Invalid line number');
-        return;
+  let highlightedContent = '';
+  lines.forEach((line, index) => {
+    if (index === lineNumber) {
+      highlightedContent +=
+          `<span class="highlight ${color}">${line || ' '}</span>\n`;
+    } else {
+      highlightedContent += `${line}\n`;
     }
+  });
 
-    // Build highlighted conten
-    let highlightedContent = '';
-    lines.forEach((line, index) => {
-        if (index === lineNumber) {
-            highlightedContent += `<span class="highlight">${line || ' '}</span>\n`;
-        } else {
-            highlightedContent += `${line}\n`;
-        }
-    });
-    console.log(highlight);
+  highlight.innerHTML = highlightedContent;
+}
 
-    // Update the highlight pre element
-    highlight.innerHTML = highlightedContent;
+function resetHighlight(highlightId) {
+  const highlight = document.getElementById(highlightId);
+  let text = highlight.innerHTML;
+  text = text.replace(/<span class="highlight.*">/, '');
+  text = text.replace('</span>', '');
+  highlight.innerHTML = text;
 }

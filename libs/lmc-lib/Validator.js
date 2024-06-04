@@ -1,94 +1,107 @@
 export const instructions = [
-    { mnemonic: "ADD", opcode: 100 },
-    { mnemonic: "SUB", opcode: 200 },
-    { mnemonic: "STA", opcode: 300 },
-    { mnemonic: "LDA", opcode: 500 },
-    { mnemonic: "BRA", opcode: 600 },
-    { mnemonic: "BRZ", opcode: 700 },
-    { mnemonic: "BRP", opcode: 800 },
-    { mnemonic: "INP", opcode: 901 },
-    { mnemonic: "OUT", opcode: 902 },
-    { mnemonic: "HLT", opcode: 0 },
-    { mnemonic: "DAT", opcode: null }];
+  {mnemonic: 'ADD', opcode: 100}, {mnemonic: 'SUB', opcode: 200},
+  {mnemonic: 'STA', opcode: 300}, {mnemonic: 'LDA', opcode: 500},
+  {mnemonic: 'BRA', opcode: 600}, {mnemonic: 'BRZ', opcode: 700},
+  {mnemonic: 'BRP', opcode: 800}, {mnemonic: 'INP', opcode: 901},
+  {mnemonic: 'OUT', opcode: 902}, {mnemonic: 'HLT', opcode: 0},
+  {mnemonic: 'DAT', opcode: null}
+];
 
 export default class Validator {
-    labels;
-    error;
+  labels;
+  error;
 
-    constructor(text) {
-        this.labels = this.getLabels(text);
-        if (this.labels != undefined)
-            this.error = this.validation(text);
+  constructor(text) {
+    if (text != '') text = this.deletingComments(text);
+    this.labels = this.getLabels(text);
+    if (this.labels != undefined) this.error = this.validation(text);
+  }
+
+  deletingComments(text) {
+    let result = '';
+    let lines = text.split('\n').filter(Boolean);
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].includes('//')) {
+        if (lines[i].indexOf('//') != 0)
+          result += lines[i].slice(0, lines[i].indexOf('//')) + '\n';
+      } else
+        result += lines[i] + '\n';
     }
+    return result;
+  }
 
-    getLabels(text) {
-        var labels = new Map();
-        var count = 0;
-        var lines = text.split('\n').filter(Boolean);
-        lines.forEach(line => {
-            var items = line.split(" ").filter(Boolean);
-            if (!this.isInstruction(items[0])) {
-                if (!labels.has(items[0])) {
-                    labels.set(items[0], count);
-                }
-                else {
-                    this.error = { code: "label already exist", line: count };
-                    return undefined;
-                }
-            }
-            count++;
-        });
-        return labels;
-    }
-
-    validation(text) {
-        var lines = text.split('\n').filter(Boolean);
-        for (var i = 0; i < lines.length; i++) {
-            var items = lines[i].split(' ').filter(Boolean);
-
-            var offset = 0;
-            if (!this.isInstruction(items[0])) {
-                offset++;
-            }
-
-            if (this.isInstruction(items[0 + offset])) {
-                if (items.length < 3 + offset) {
-                    if (!["INP", "OUT", "HLT"].includes(items[0 + offset])) {
-                        if (items[0 + offset] == "DAT" && items.length > 1 + offset && Number.isNaN(Number(items[1 + offset]))) {
-                            return { code: "value was expected", line: i };
-                        }
-                        else if (items[0 + offset] != "DAT" && this.getRegister(items[1 + offset]) == null) {
-                            return { code: "register was expected", line: i };
-                        }
-                    }
-                    else if (items.length > 1 + offset) {
-                        return { code: "incorrect line", line: i };
-                    }
-                }
-                else {
-                    return { code: "incorrect line", line: i };
-                }
-            }
+  getLabels(text) {
+    let labels = new Map();
+    let lines = text.split('\n').filter(Boolean);
+    for (let i = 0; i < lines.length; i++) {
+      let items = lines[i].split(' ').filter(Boolean);
+      if (!this.isInstruction(items[0])) {
+        if (!labels.has(items[0])) {
+          labels.set(items[0], i);
+        } else {
+          this.error = {code: 'label already exist', line: i};
+          return undefined;
         }
+      }
     }
+    return labels;
+  }
 
-    isInstruction(text) {
-        var flag = false;
-        for (var i = 0; !flag && i < instructions.length; i++) {
-            if (instructions[i].mnemonic == text) {
-                flag = true;
+  validation(text) {
+    let lines = text.split('\n').filter(Boolean);
+    for (let i = 0; i < lines.length; i++) {
+      let items = lines[i].split(' ').filter(Boolean);
+
+      let offset = 0;
+      if (!this.isInstruction(items[0])) {
+        offset++;
+      }
+
+      if (this.isInstruction(items[0 + offset])) {
+        if (items.length < 3 + offset) {
+          if (!['INP', 'OUT', 'HLT'].includes(items[0 + offset])) {
+            if (items[0 + offset] == 'DAT' && items.length > 1 + offset &&
+                Number.isNaN(Number(items[1 + offset]))) {
+              return {code: 'incorrect register, expected value', line: i};
+            } else if (
+                items[0 + offset] != 'DAT' &&
+                this.getRegister(items[1 + offset]) == null) {
+              return {code: 'incorrect register, expected label', line: i};
             }
+          } else if (items.length > 1 + offset) {
+            return {
+              code: 'incorrect line, many arguments',
+              line: i
+            };
+          }
+        } else {
+          return {
+            code: 'incorrect line, many arguments',
+            line: i
+          };
         }
-        return flag;
+      } else {
+        return {code: 'incorrect instruction code', line: i};
+      }
     }
+  }
 
-    getRegister(label) {
-        if (this.labels.has(label)) {
-            return this.labels.get(label);
-        }
-        else if (!Number.isNaN(Number(label))) {
-            return label;
-        }
-        return null;
+  isInstruction(text) {
+    let flag = false;
+    for (let i = 0; !flag && i < instructions.length; i++) {
+      if (instructions[i].mnemonic == text) {
+        flag = true;
+      }
     }
+    return flag;
+  }
+
+  getRegister(label) {
+    if (this.labels.has(label)) {
+      return this.labels.get(label);
+    } else if (!Number.isNaN(Number(label))) {
+      return label;
+    }
+    return null;
+  }
 }

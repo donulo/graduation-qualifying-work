@@ -23,9 +23,9 @@ export default class Instruction {
         return 'EXIT';
       case 9:
         if (this.register == 1) {
-          var input = document.getElementById('input');
-          var border = input.style.border;
-          input.style.border = '1px solid red';
+          let input = document.getElementById('input');
+          let border = input.style.border;
+          input.style.border = '2px solid rgba(255, 0, 0, 0.5)';
           await this.promiseClick(document.getElementById('sumbit'));
           controller.accumulator = parseInt(input.value);
           controller.program_counter++;

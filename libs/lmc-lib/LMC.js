@@ -17,7 +17,7 @@ export default class LMC {
   }
 
   async step() {
-    var instruction = new Instruction(
+    let instruction = new Instruction(
         this.controller.memory, this.controller.program_counter);
     return await instruction.execute(this.controller);
   }

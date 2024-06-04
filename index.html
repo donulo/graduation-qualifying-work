@@ -5,12 +5,13 @@
     <meta charset="utf-8" />
     <title>LMC</title>
     <link rel="stylesheet" href="style.css">
+    <script src="libs/file.js" defer></script>
+    <script src="libs/modal.js" defer></script>
+    <script type="module" src="script.js" defer></script>
 </head>
 
 <body>
-    <script src="file.js"></script>
-
-    <div class="flex">
+    <div class="flex half">
         <div class="flex">
             <div class="highlight-container">
                 <pre id="highlightInputArea" class="highlight-text"></pre>
@@ -22,11 +23,11 @@
             </div>
         </div>
 
-        <div id="controller-container" class="flex column">
+        <div id="controller-container" class="flex column half">
             <div class="flex column center">
                 <label>Input</label>
                 <div id="inputdiv" class="flex">
-                    <textarea id="input" class="field"></textarea>
+                    <input id="input" class="field">
                     <label id="sumbit" class="button">&gt;&gt;</label>
                 </div>
             </div>
@@ -44,11 +45,12 @@
             </div>
         </div>
 
-        <div id="memory-container">
+        <div id="memory-container half">
             <table id="memory"></table>
         </div>
     </div>
-    <div class="flex">
+    
+    <div id="control-panel" class="flex center">
         <div>
             <input id="load" type="file" onchange="load(this)" hidden>
             <label class="button" for="load">Load</label>
@@ -62,9 +64,103 @@
         <div>
             <label id="step" class="button">Step</label>
         </div>
+        <div>
+            <label id="reset" class="button">Reset</label>
+        </div>
+        <div class="spacer"></div>
+        <div>
+            <label id="help" class="button">Help</label>
+        </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <div class="modal">
+        <div class="modal-main">
+            <h2 class="modal-title">Instruction Code</h2>
+
+            <div class="modal-container">
+                <table>
+                    <tr>
+                        <td>1xx</td>
+                        <td>ADD</td>
+                        <td>ADD</td>
+                        <td>Add the value stored in mailbox xx to whatever value is currently on the accumulator.</td>
+                    </tr>
+                    <tr>
+                        <td>2xx</td>
+                        <td>SUB</td>
+                        <td>SUBTRACT</td>
+                        <td>Subtract the value stored in mailbox xx from whatever value is currently on the accumulator.</td>
+                    </tr>
+                    <tr>
+                        <td>3xx</td>
+                        <td>STA</td>
+                        <td>STORE</td>
+                        <td>Store the contents of the accumulator in mailbox xx.</td>
+                    </tr>
+                    <tr>
+                        <td>5xx</td>
+                        <td>LDA</td>
+                        <td>LOAD</td>
+                        <td>Load the value from mailbox xx and enter it in the accumulator.</td>
+                    </tr>
+                    <tr>
+                        <td>6xx</td>
+                        <td>BRA</td>
+                        <td>BRANCH ALWAYS</td>
+                        <td>
+                            Set the program counter to the given address (value xx). 
+                            That is, the value in mailbox xx will be the next instruction executed.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>7xx</td>
+                        <td>BRZ</td>
+                        <td>BRANCH IF ZERO</td>
+                        <td>
+                            If the accumulator contains the value 000, set the program counter to the value xx.
+                            Otherwise, do nothing.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>8xx</td>
+                        <td>BRP</td>
+                        <td>BRANCH IF POSITIVE</td>
+                        <td>
+                            If the accumulator is 0 or positive, set the program counter to the value xx. 
+                            Otherwise, do nothing.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>901</td>
+                        <td>INP</td>
+                        <td>INPUT</td>
+                        <td>Go to the INBOX, fetch the value from the user, and put it in the accumulator.</td>
+                    </tr>
+                    <tr>
+                        <td>902</td>
+                        <td>OUT</td>
+                        <td>OUTPUT</td>
+                        <td>Copy the value from the accumulator to the OUTBOX.</td>
+                    </tr>
+                    <tr>
+                        <td>000</td>
+                        <td>HLT</td>
+                        <td>HALT</td>
+                        <td>Stop working/end the program.</td>
+                    </tr>
+                    <tr>
+                        <td>———</td>
+                        <td>DAT</td>
+                        <td>DATA</td>
+                        <td>This is an assembler instruction which simply loads the value into the next available mailbox.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <button class="modal-close">&#10006;</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
