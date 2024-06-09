@@ -40,19 +40,20 @@ function drawing() {
 function compile() {
   let text = document.getElementById('inputArea').value;
   lmc = new LMC(text);
-  if (lmc.compiler.intermediate_code != undefined)
+  if (lmc.compiler.error == undefined)
     document.getElementById('outputArea').value =
-        lmc.compiler.intermediate_code;
+      lmc.compiler.intermediate_code;
   else {
     document.getElementById('outputArea').value =
-        'Error: ' + lmc.compiler.error.code;
+      'Error: ' + lmc.compiler.error.code;
     document.getElementById('outputArea').value +=
-        '\nLine: ' + lmc.compiler.error.line;
+      '\nLine: ' + lmc.compiler.error.line;
     highlightLine(
-        'inputArea', 'highlightInputArea', lmc.compiler.error.line, 'red');
+      'inputArea', 'highlightInputArea', lmc.compiler.error.line, 'red');
   }
   clearBorder();
   drawing();
+  console.log(lmc);
 }
 document.querySelector('#compile').addEventListener('click', compile);
 
@@ -61,32 +62,30 @@ function sleep(ms) {
 }
 
 async function run() {
+  let state;
   do {
-    highlightLine(
-        'inputArea', 'highlightInputArea', lmc.controller.program_counter,
-        'green');
-    highlightLine(
-        'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
-        'green');
-    clearBorder();
-    currentBorder(lmc.controller.program_counter);
-    drawing();
+    state = await step();
     await sleep(1000);
-  } while (await lmc.step() != 'EXIT')
+  } while (state != 'EXIT')
 }
 document.querySelector('#run').addEventListener('click', run);
 
 async function step() {
   highlightLine(
-      'inputArea', 'highlightInputArea', lmc.controller.program_counter,
-      'green');
+    'inputArea', 'highlightInputArea', lmc.controller.program_counter,
+    'green');
   highlightLine(
-      'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
-      'green');
+    'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
+    'green');
   clearBorder();
   currentBorder(lmc.controller.program_counter);
-  await lmc.step();
+  let state = await lmc.step();
   drawing();
+  if (state == 'NOEXEC' || state == "NOSTORE") {
+    alert('Error: segmentation fault\nLine: ' + lmc.controller.program_counter);
+    return 'EXIT';
+  }
+  return state;
 }
 document.querySelector('#step').addEventListener('click', step);
 
@@ -126,7 +125,7 @@ function highlightLine(textareaId, highlightId, lineNumber, color) {
   lines.forEach((line, index) => {
     if (index === lineNumber) {
       highlightedContent +=
-          `<span class="highlight ${color}">${line || ' '}</span>\n`;
+        `<span class="highlight ${color}">${line || ' '}</span>\n`;
     } else {
       highlightedContent += `${line}\n`;
     }

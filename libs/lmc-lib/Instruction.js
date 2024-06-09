@@ -1,10 +1,14 @@
 export default class Instruction {
   instruction;
   register;
+  segments;
 
-  constructor(memory, program_counter) {
-    this.instruction = parseInt((memory[program_counter])[0]);
-    this.register = parseInt((memory[program_counter]).substring(1));
+  constructor(memory, program_counter, segments) {
+    if (this.checkMode(program_counter, 'x', segments)) {
+      this.instruction = parseInt((memory[program_counter])[0]);
+      this.register = parseInt((memory[program_counter]).substring(1));
+      this.segments = segments;
+    }
   }
 
   promiseClick(button) {
@@ -15,6 +19,24 @@ export default class Instruction {
       }
       button.addEventListener('click', listener);
     });
+  }
+
+  checkMode(register, mode, segments = this.segments) {
+    if (mode == 'r') {
+      return true;
+    }
+    if (mode == 'w') {
+      if (segments.free.FB <= register && register <= segments.free.FB + segments.free.FL)
+        return true;
+      else
+        return false;
+    }
+    if (mode == 'x') {
+      if (segments.code.CB <= register && register <= segments.code.CB + segments.code.CL)
+        return true;
+      else
+        return false;
+    }
   }
 
   async execute(controller) {
@@ -46,10 +68,15 @@ export default class Instruction {
         controller.program_counter++;
         return 'SUB';
       case 3:
-        controller.memory[this.register] =
+        if (this.checkMode(this.register, 'w')) {
+          controller.memory[this.register] =
             controller.accumulator.toString().padStart(3, '0');
-        controller.program_counter++;
-        return 'STORE';
+          controller.program_counter++;
+          return 'STORE';
+        }
+        else {
+          return 'NOSTORE';
+        }
       case 5:
         controller.accumulator = parseInt(controller.memory[this.register]);
         controller.program_counter++;

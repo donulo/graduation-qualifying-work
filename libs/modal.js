@@ -1,4 +1,4 @@
-const modalController = ({modal, btnOpen, btnClose, time = 300}) => {
+const modalController = ({ modal, btnOpen, btnClose, time = 300 }) => {
   const buttonElems = document.querySelectorAll(btnOpen);
   const modalElem = document.querySelector(modal);
 
@@ -10,20 +10,20 @@ const modalController = ({modal, btnOpen, btnClose, time = 300}) => {
   `;
 
   const closeModal =
-      event => {
-        const target = event.target;
+    event => {
+      const target = event.target;
 
-        if (target === modalElem || (btnClose && target.closest(btnClose)) ||
-            event.code === 'Escape') {
-          modalElem.style.opacity = 0;
+      if (target === modalElem || (btnClose && target.closest(btnClose)) ||
+        event.code === 'Escape') {
+        modalElem.style.opacity = 0;
 
-          setTimeout(() => {
-            modalElem.style.visibility = 'hidden';
-          }, time);
+        setTimeout(() => {
+          modalElem.style.visibility = 'hidden';
+        }, time);
 
-          window.removeEventListener('keydown', closeModal);
-        }
+        window.removeEventListener('keydown', closeModal);
       }
+    }
 
   const openModal = () => {
     modalElem.style.visibility = 'visible';

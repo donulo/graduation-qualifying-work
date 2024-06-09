@@ -3,7 +3,7 @@ function load(input) {
   var reader = new FileReader();
   reader.readAsText(file);
 
-  reader.onload = function() {
+  reader.onload = function () {
     var inputArea = document.getElementById('inputArea');
     inputArea.value = reader.result;
   };
