@@ -42,17 +42,23 @@ function compile() {
   lmc = new LMC(text);
   if (lmc.compiler.error == undefined)
     document.getElementById('outputArea').value =
-      lmc.compiler.intermediate_code;
+        lmc.compiler.intermediate_code;
   else {
     document.getElementById('outputArea').value =
-      'Error: ' + lmc.compiler.error.code;
+        'Error: ' + lmc.compiler.error.code;
     document.getElementById('outputArea').value +=
-      '\nLine: ' + lmc.compiler.error.line;
+        '\nLine: ' + lmc.compiler.error.line;
     highlightLine(
-      'inputArea', 'highlightInputArea', lmc.compiler.error.line, 'red');
+        'inputArea', 'highlightInputArea', lmc.compiler.error.line, 'red');
   }
   clearBorder();
   drawing();
+  coloredSegment(
+      lmc.compiler.segments.code.CB, lmc.compiler.segments.code.CL,
+      'rgba(0, 255, 0, 0.3)');
+  coloredSegment(
+      lmc.compiler.segments.data.DB, lmc.compiler.segments.data.DL,
+      'rgba(155, 0, 0, 0.3)');
   console.log(lmc);
 }
 document.querySelector('#compile').addEventListener('click', compile);
@@ -72,16 +78,16 @@ document.querySelector('#run').addEventListener('click', run);
 
 async function step() {
   highlightLine(
-    'inputArea', 'highlightInputArea', lmc.controller.program_counter,
-    'green');
+      'inputArea', 'highlightInputArea', lmc.controller.program_counter,
+      'green');
   highlightLine(
-    'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
-    'green');
+      'outputArea', 'highlightOutputArea', lmc.controller.program_counter,
+      'green');
   clearBorder();
   currentBorder(lmc.controller.program_counter);
   let state = await lmc.step();
   drawing();
-  if (state == 'NOEXEC' || state == "NOSTORE") {
+  if (state == 'NOEXEC' || state == 'NOSTORE') {
     alert('Error: segmentation fault\nLine: ' + lmc.controller.program_counter);
     return 'EXIT';
   }
@@ -113,7 +119,7 @@ function clearBorder() {
 function currentBorder(program_counter) {
   let trs = (memory.children)[0].children
   let tds = trs[parseInt(program_counter / 10)].children;
-  tds[program_counter % 10].style.border = '1px solid rgba(0, 255, 0, 0.7)';
+  tds[program_counter % 10].style.border = '1px solid rgba(0, 255, 0, 1)';
 }
 
 function highlightLine(textareaId, highlightId, lineNumber, color) {
@@ -125,7 +131,7 @@ function highlightLine(textareaId, highlightId, lineNumber, color) {
   lines.forEach((line, index) => {
     if (index === lineNumber) {
       highlightedContent +=
-        `<span class="highlight ${color}">${line || ' '}</span>\n`;
+          `<span class="highlight ${color}">${line || ' '}</span>\n`;
     } else {
       highlightedContent += `${line}\n`;
     }
@@ -140,4 +146,22 @@ function resetHighlight(highlightId) {
   text = text.replace(/<span class="highlight.*">/, '');
   text = text.replace('</span>', '');
   highlight.innerHTML = text;
+}
+
+function coloredSegment(ib, il, color) {
+  let i = parseInt(ib / 10);
+  let j = ib % 10;
+  let count = 0;
+  let trs = (memory.children)[0].children;
+  for (; count != il + 1 && i < trs.length; i++) {
+    let tds = trs[i].children;
+    for (; count != il + 1 && j < tds.length; j++) {
+      coloredBackground(tds[j], color);
+      count++;
+    }
+  }
+}
+
+function coloredBackground(element, color) {
+  element.style.background = color;
 }
