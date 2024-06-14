@@ -71,7 +71,7 @@ async function run() {
   let state;
   do {
     state = await step();
-    await sleep(1000);
+    await sleep(100);
   } while (state != 'EXIT')
 }
 document.querySelector('#run').addEventListener('click', run);
@@ -159,6 +159,7 @@ function coloredSegment(ib, il, color) {
       coloredBackground(tds[j], color);
       count++;
     }
+    if (j == tds.length) j = 0;
   }
 }
 

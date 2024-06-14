@@ -1,10 +1,10 @@
 export const instructions = [
-  { mnemonic: 'ADD', opcode: 100 }, { mnemonic: 'SUB', opcode: 200 },
-  { mnemonic: 'STA', opcode: 300 }, { mnemonic: 'LDA', opcode: 500 },
-  { mnemonic: 'BRA', opcode: 600 }, { mnemonic: 'BRZ', opcode: 700 },
-  { mnemonic: 'BRP', opcode: 800 }, { mnemonic: 'INP', opcode: 901 },
-  { mnemonic: 'OUT', opcode: 902 }, { mnemonic: 'HLT', opcode: 0 },
-  { mnemonic: 'DAT', opcode: null }
+  {mnemonic: 'ADD', opcode: 100}, {mnemonic: 'SUB', opcode: 200},
+  {mnemonic: 'STA', opcode: 300}, {mnemonic: 'LDA', opcode: 500},
+  {mnemonic: 'BRA', opcode: 600}, {mnemonic: 'BRZ', opcode: 700},
+  {mnemonic: 'BRP', opcode: 800}, {mnemonic: 'INP', opcode: 901},
+  {mnemonic: 'OUT', opcode: 902}, {mnemonic: 'HLT', opcode: 0},
+  {mnemonic: 'DAT', opcode: null}
 ];
 
 export function isInstruction(text) {
@@ -50,7 +50,7 @@ export default class Validator {
         if (!labels.has(items[0])) {
           labels.set(items[0], i);
         } else {
-          this.error = { code: 'label already exist', line: i };
+          this.error = {code: 'label already exist', line: i};
           return undefined;
         }
       }
@@ -72,27 +72,21 @@ export default class Validator {
         if (items.length < 3 + offset) {
           if (!['INP', 'OUT', 'HLT'].includes(items[0 + offset])) {
             if (items[0 + offset] == 'DAT' && items.length > 1 + offset &&
-              Number.isNaN(Number(items[1 + offset]))) {
-              return { code: 'incorrect register, expected value', line: i };
+                Number.isNaN(Number(items[1 + offset]))) {
+              return {code: 'incorrect register, expected value', line: i};
             } else if (
-              items[0 + offset] != 'DAT' &&
-              this.getRegister(items[1 + offset]) == null) {
-              return { code: 'incorrect register, expected label', line: i };
+                items[0 + offset] != 'DAT' &&
+                this.getRegister(items[1 + offset]) == null) {
+              return {code: 'incorrect register, expected label', line: i};
             }
           } else if (items.length > 1 + offset) {
-            return {
-              code: 'incorrect line, many arguments',
-              line: i
-            };
+            return {code: 'incorrect line, many arguments', line: i};
           }
         } else {
-          return {
-            code: 'incorrect line, many arguments',
-            line: i
-          };
+          return {code: 'incorrect line, many arguments', line: i};
         }
       } else {
-        return { code: 'incorrect instruction code', line: i };
+        return {code: 'incorrect instruction code', line: i};
       }
     }
   }
